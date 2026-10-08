@@ -15,9 +15,9 @@
 body {
   font-family: 'Nunito', sans-serif;
   min-height: 100vh; color: #ece8f4; overflow-x: hidden;
-  /* Imagem dos heróis ao fundo + véu escuro para legibilidade */
+  /* Imagem dos heróis ao fundo + véu suave para legibilidade */
   background:
-    linear-gradient(rgba(8,12,30,.90), rgba(8,12,30,.94)),
+    linear-gradient(rgba(10,15,35,.20), rgba(10,15,35,.42)),
     url('fundo-herois.jpg') center top / cover no-repeat fixed,
     #0b1026;
 }
@@ -130,21 +130,15 @@ body {
 .pontos.quente { background: rgba(34,197,94,.2); color: #86efac; }
 .vazio { text-align: center; color: #a8b6d6; font-weight: 700; margin-top: 40px; width: 100%; }
 
-/* ===== Comemoração nível 9 ===== */
-.comemoracao {
-  position: fixed; inset: 0; background: rgba(5,8,20,.78);
-  display: flex; align-items: center; justify-content: center; z-index: 100;
-  animation: aparecer .3s ease;
+/* ===== Brilho de DIA DE HERÓI (nível 9) no próprio cartão ===== */
+.cartao-termometro.nivel-max { animation: aparecer .5s ease backwards, heroiGlow 1.6s ease-in-out infinite; }
+@keyframes heroiGlow {
+  0%, 100% { box-shadow: var(--sombra), 0 0 18px rgba(251,191,36,.35); border-color: #fbbf24; }
+  50%      { box-shadow: var(--sombra), 0 0 46px rgba(251,191,36,.9);  border-color: #fde68a; }
 }
-.comemoracao-inner { text-align: center; }
-.comemoracao-emoji { font-size: 6rem; display: inline-block; animation: pulsar .8s ease infinite alternate; }
-.comemoracao-texto {
-  font-family: 'Baloo 2', cursive; color: #fbbf24; font-size: 2.2rem;
-  text-shadow: 0 4px 16px rgba(251,191,36,.5);
-}
-@keyframes pulsar { from { transform: scale(1) rotate(-8deg); } to { transform: scale(1.25) rotate(8deg); } }
-.confete { position: absolute; top: -20px; font-size: 1.5rem; animation: cair 2.6s linear infinite; }
-@keyframes cair { to { transform: translateY(110vh) rotate(720deg); } }
+.cartao-termometro.nivel-max .heroi-icone { animation: pulsar 1.2s ease infinite alternate; }
+@keyframes pulsar { from { transform: scale(1); } to { transform: scale(1.18); } }
+.cartao-termometro.nivel-max .rosto { filter: drop-shadow(0 0 10px gold); }
 
 /* ===== Área Admin ===== */
 .admin {
@@ -226,6 +220,50 @@ select option { color: #111; }
 .evento .pts { font-weight: 800; font-size: 1rem; }
 .pts.pos { color: #86efac; } .pts.neg { color: #fca5a5; }
 .evento em { color: #93a5cc; }
+.btn-del {
+  background: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.3);
+  border-radius: 8px; width: 28px; height: 28px; cursor: pointer; font-size: .8rem;
+  flex-shrink: 0; transition: background .15s;
+}
+.btn-del:hover { background: rgba(239,68,68,.4); }
+
+/* Lista de tarefas */
+.lista-tarefas { display: flex; flex-direction: column; gap: 8px; }
+.tarefa {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  border-radius: 14px; background: rgba(255,255,255,.05); animation: aparecer .3s ease;
+}
+.tarefa span.nome { flex: 1; font-weight: 700; }
+.tarefa button {
+  border: none; border-radius: 10px; padding: 8px 12px; cursor: pointer;
+  font-family: 'Baloo 2', cursive; color: #fff; transition: transform .12s; font-size: .85rem;
+}
+.tarefa button:active { transform: scale(.94); }
+.tarefa .feita { background: linear-gradient(135deg, #4ade80, #16a34a); }
+.tarefa .nao-feita { background: linear-gradient(135deg, #fb923c, #c2410c); }
+.tarefa .del-tarefa { background: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+.btn-del {
+  background: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.3);
+  border-radius: 8px; width: 28px; height: 28px; cursor: pointer; font-size: .8rem;
+  flex-shrink: 0; transition: background .15s;
+}
+.btn-del:hover { background: rgba(239,68,68,.4); }
+
+/* Lista de tarefas */
+.lista-tarefas { display: flex; flex-direction: column; gap: 8px; }
+.tarefa {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  border-radius: 14px; background: rgba(255,255,255,.05); animation: aparecer .3s ease;
+}
+.tarefa span.nome { flex: 1; font-weight: 700; }
+.tarefa button {
+  border: none; border-radius: 10px; padding: 8px 12px; cursor: pointer;
+  font-family: 'Baloo 2', cursive; color: #fff; transition: transform .12s; font-size: .85rem;
+}
+.tarefa button:active { transform: scale(.94); }
+.tarefa .feita { background: linear-gradient(135deg, #4ade80, #16a34a); }
+.tarefa .nao-feita { background: linear-gradient(135deg, #fb923c, #c2410c); }
+.tarefa .del-tarefa { background: rgba(239,68,68,.15); color: #f87171; border: 1px solid rgba(239,68,68,.3); }
 .sem-eventos { color: #71809f; font-weight: 700; text-align: center; padding: 10px; }
 .nome-selecionada { color: #93a5cc; font-size: 1rem; }
 
@@ -293,20 +331,21 @@ select option { color: #111; }
     </section>
 
     <section class="cartao">
+      <h2>✅ Tarefas do dia</h2>
+      <div class="linha-form" style="margin-bottom:14px">
+        <input type="text" id="novaTarefa" placeholder="Nova tarefa (ex: escovar os dentes)">
+        <button class="btn btn-azul" onclick="cadastrarTarefa()">Adicionar</button>
+      </div>
+      <div id="listaTarefas" class="lista-tarefas"></div>
+    </section>
+
+    <section class="cartao">
       <h2>📋 Eventos de hoje <span id="nomeSelecionada" class="nome-selecionada"></span></h2>
       <div id="listaEventos" class="lista-eventos"></div>
     </section>
 
   </div>
 </main>
-
-<!-- Comemoração nível 9 -->
-<div id="comemoracao" class="comemoracao escondido">
-  <div class="comemoracao-inner">
-    <span class="comemoracao-emoji">🏆</span>
-    <p class="comemoracao-texto">DIA DE HERÓI!</p>
-  </div>
-</div>
 
 <footer class="rodape">Atualiza sozinho em todos os aparelhos ✨</footer>
 
@@ -429,10 +468,10 @@ function mostrarView(view) {
   document.getElementById('abaTermometro').classList.toggle('ativa', !isAdminView);
   document.getElementById('abaAdmin').classList.toggle('ativa', isAdminView);
   document.getElementById('tituloPagina').textContent = isAdminView ? '⚙️ Área dos Pais' : '🛡️ HERÓIS DO DIA';
-  if (isAdminView && sessionStorage.getItem('adminOk') === 'sim') {
-    document.getElementById('telaSenha').classList.add('escondido');
-    document.getElementById('painelAdmin').classList.remove('escondido');
-  }
+  // Sempre pede a senha ao abrir a área dos pais
+  document.getElementById('telaSenha').classList.remove('escondido');
+  document.getElementById('painelAdmin').classList.add('escondido');
+  document.getElementById('campoSenha').value = '';
 }
 
 /* ==================== TERMÔMETROS (TEMPO REAL) ==================== */
@@ -440,7 +479,6 @@ const grade = document.getElementById('viewTermometro');
 const seletor = document.getElementById('seletorCriancas');
 const listaEventos = document.getElementById('listaEventos');
 var criancaSelecionada = null;
-var teveNivel9 = false;
 
 if (configOk) {
   db.ref('criancas').on('value', async (snapshot) => {
@@ -516,35 +554,15 @@ function criarTermometro(crianca, nivel, pontos) {
   pts.textContent = (pontos > 0 ? '+' : '') + pontos + ' ponto' + (pontos === 1 || pontos === -1 ? '' : 's');
   cartao.appendChild(pts);
 
-  if (nivel === 9 && !teveNivel9) { teveNivel9 = true; comemorar(crianca.nome); }
-  if (nivel < 9) teveNivel9 = false;
+  // DIA DE HERÓI: o próprio cartão brilha (sem tela de comemoração)
+  if (nivel === 9) cartao.classList.add('nivel-max');
 
   return cartao;
-}
-
-function comemorar(nome) {
-  const tela = document.getElementById('comemoracao');
-  tela.querySelector('.comemoracao-texto').textContent = nome.toUpperCase() + ' — DIA DE HERÓI!';
-  tela.classList.remove('escondido');
-  const emojis = ['🎉', '🏆', '⭐', '🛡️', '⚡', '🎊', '💥'];
-  for (let i = 0; i < 40; i++) {
-    const c = document.createElement('span');
-    c.className = 'confete';
-    c.textContent = emojis[i % emojis.length];
-    c.style.left = Math.random() * 100 + 'vw';
-    c.style.animationDelay = Math.random() * 2 + 's';
-    tela.appendChild(c);
-  }
-  setTimeout(() => {
-    tela.classList.add('escondido');
-    tela.querySelectorAll('.confete').forEach(c => c.remove());
-  }, 4000);
 }
 
 /* ==================== SENHA ==================== */
 function entrar() {
   if (document.getElementById('campoSenha').value === SENHA_ADMIN) {
-    sessionStorage.setItem('adminOk', 'sim');
     document.getElementById('telaSenha').classList.add('escondido');
     document.getElementById('painelAdmin').classList.remove('escondido');
   } else {
@@ -593,6 +611,52 @@ function criarChip(id, crianca) {
   seletor.appendChild(chip);
 }
 
+/* ==================== TAREFAS ==================== */
+const listaTarefas = document.getElementById('listaTarefas');
+
+async function cadastrarTarefa() {
+  const input = document.getElementById('novaTarefa');
+  const nome = input.value.trim();
+  if (!nome) return;
+  await db.ref('tarefas').push({ nome });
+  input.value = '';
+}
+
+async function lancarTarefa(tarefa, feita) {
+  const tipo = {
+    id: feita ? 'tarefa' : 'tarefa_nao',
+    label: tarefa.nome + (feita ? ' (feita)' : ' (não feita)'),
+    pontos: feita ? 1 : -1
+  };
+  await lancarEvento(tipo);
+}
+
+if (configOk) {
+  db.ref('tarefas').on('value', (snapshot) => {
+    const dados = snapshot.val();
+    listaTarefas.innerHTML = '';
+    if (!dados) { listaTarefas.innerHTML = '<p class="sem-eventos">Nenhuma tarefa cadastrada ainda.</p>'; return; }
+    Object.entries(dados).forEach(([id, t]) => {
+      const div = document.createElement('div');
+      div.className = 'tarefa';
+      const nome = document.createElement('span');
+      nome.className = 'nome';
+      nome.textContent = t.nome;
+      const bFeita = document.createElement('button');
+      bFeita.className = 'feita'; bFeita.textContent = '✅ Feita (+1)';
+      bFeita.onclick = () => lancarTarefa(t, true);
+      const bNao = document.createElement('button');
+      bNao.className = 'nao-feita'; bNao.textContent = '❌ Não feita (−1)';
+      bNao.onclick = () => lancarTarefa(t, false);
+      const bDel = document.createElement('button');
+      bDel.className = 'del-tarefa'; bDel.textContent = '🗑';
+      bDel.onclick = async () => { if (confirm('Excluir a tarefa "' + t.nome + '"?')) await db.ref('tarefas/' + id).remove(); };
+      div.append(nome, bFeita, bNao, bDel);
+      listaTarefas.appendChild(div);
+    });
+  });
+}
+
 /* ==================== EVENTOS ==================== */
 async function lancarEvento(tipo) {
   if (!criancaSelecionada) { alert('Selecione uma criança primeiro.'); return; }
@@ -631,6 +695,13 @@ async function desfazerUltimo() {
   await atualizarPontos(criancaSelecionada, pontosAtuais, -evento.pontos);
 }
 
+async function excluirEvento(childId, eventoKey, pontos) {
+  if (!confirm('Excluir este evento? Os pontos serão revertidos.')) return;
+  const pontosAtuais = (await db.ref('criancas/' + childId + '/pontos').get()).val() || 0;
+  await db.ref('eventos/' + childId + '/' + hoje() + '/' + eventoKey).remove();
+  await atualizarPontos(childId, pontosAtuais, -(pontos || 0));
+}
+
 function carregarEventos() {
   listaEventos.innerHTML = '<p class="sem-eventos">Carregando...</p>';
   if (!criancaSelecionada) { listaEventos.innerHTML = ''; return; }
@@ -643,8 +714,17 @@ function carregarEventos() {
       const div = document.createElement('div');
       div.className = 'evento';
       const classe = ev.pontos > 0 ? 'pos' : 'neg';
-      div.innerHTML = '<span>' + ev.hora + ' — ' + ev.label + (ev.nota ? ' <em>(' + ev.nota + ')</em>' : '') + '</span>' +
-        '<span class="pts ' + classe + '">' + (ev.pontos > 0 ? '+' : '') + ev.pontos + '</span>';
+      const spanTxt = document.createElement('span');
+      spanTxt.innerHTML = ev.hora + ' — ' + ev.label + (ev.nota ? ' <em>(' + ev.nota + ')</em>' : '');
+      const spanPts = document.createElement('span');
+      spanPts.className = 'pts ' + classe;
+      spanPts.textContent = (ev.pontos > 0 ? '+' : '') + ev.pontos;
+      const btnDel = document.createElement('button');
+      btnDel.className = 'btn-del';
+      btnDel.textContent = '✖';
+      btnDel.title = 'Excluir evento (reverte os pontos)';
+      btnDel.onclick = () => excluirEvento(criancaSelecionada, id, ev.pontos);
+      div.append(spanTxt, spanPts, btnDel);
       listaEventos.appendChild(div);
     });
   });
