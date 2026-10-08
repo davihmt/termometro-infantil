@@ -273,20 +273,24 @@ input:focus { border-color: var(--lilas); }
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
 
 <script>
-/* ============================================================
-   CONFIGURAÇÃO DO FIREBASE — cole suas chaves aqui dentro!
-   (Firebase Console → ⚙️ Configurações do projeto → Seus
-    aplicativos → ícone </> → copiar firebaseConfig)
-   ============================================================ */
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "COLE_AQUI_SUA_API_KEY",
-  authDomain: "COLE_AQUI.firebaseapp.com",
-  databaseURL: "https://COLE_AQUI-default-rtdb.firebaseio.com",
-  projectId: "COLE_AQUI",
-  storageBucket: "COLE_AQUI.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "COLE_AQUI"
+  apiKey: "AIzaSyCgO2CpNuHVHILDvd5uz7VIlG5peG1hLWY",
+  authDomain: "termometro-infantil.firebaseapp.com",
+  databaseURL: "https://termometro-infantil-default-rtdb.firebaseio.com",
+  projectId: "termometro-infantil",
+  storageBucket: "termometro-infantil.firebasestorage.app",
+  messagingSenderId: "766557242567",
+  appId: "1:766557242567:web:826ab1315bb252a6116ae2"
 };
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
 const SENHA_ADMIN = 'goldo'; // 🔑 senha da área dos pais
 
