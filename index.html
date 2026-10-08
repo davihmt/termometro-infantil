@@ -350,6 +350,14 @@ select option { color: #111; }
       </div>
       <div class="linha-form" style="margin-top:10px">
         <input type="text" id="editFoto" placeholder="Nova foto (ex: miguel.png) — opcional">
+        <select id="editFotoPos" title="Ajuste até o rosto ficar centralizado no círculo">
+          <option value="5">Foco: rosto no topo</option>
+          <option value="12">Foco: topo-alto</option>
+          <option value="18" selected>Foco: padrão</option>
+          <option value="28">Foco: meio-alto</option>
+          <option value="40">Foco: centro</option>
+          <option value="55">Foco: meio-baixo</option>
+        </select>
         <button class="btn btn-azul" onclick="salvarEdicao()">Salvar alterações</button>
       </div>
       <div class="linha-form" style="margin-top:10px">
@@ -539,6 +547,9 @@ function criarAvatar(crianca, classeExtra) {
     img.className = classeExtra;
     img.src = crianca.foto; // ex: miguel.png (na mesma pasta do index.html)
     img.alt = crianca.nome;
+    // Foco individual do rosto (ajustável por criança; padrão 18%)
+    const foco = (typeof crianca.fotoPos === 'number') ? crianca.fotoPos : 18;
+    img.style.objectPosition = 'center ' + foco + '%';
     img.onerror = () => { img.replaceWith(document.createTextNode('')); };
     if (classeExtra === 'foto-perfil') {
       img.onclick = (e) => { e.stopPropagation(); verFoto(crianca.foto, crianca.nome, crianca.heroi); };
@@ -690,6 +701,7 @@ function preencherSelectEdicao() {
   if (valorAtual && dadosCriancas[valorAtual]) {
     sel.value = valorAtual;
     document.getElementById('editHeroi').value = dadosCriancas[valorAtual].heroi || 'capitao';
+    document.getElementById('editFotoPos').value = String(dadosCriancas[valorAtual].fotoPos ?? 18);
   }
 }
 
@@ -697,6 +709,7 @@ document.getElementById('editCrianca').addEventListener('change', () => {
   const id = document.getElementById('editCrianca').value;
   if (id && dadosCriancas && dadosCriancas[id]) {
     document.getElementById('editHeroi').value = dadosCriancas[id].heroi || 'capitao';
+    document.getElementById('editFotoPos').value = String(dadosCriancas[id].fotoPos ?? 18);
   }
 });
 
@@ -706,11 +719,12 @@ async function salvarEdicao() {
   if (!id) { msg.textContent = 'Selecione a criança primeiro.'; msg.className = 'msg erro'; return; }
   const heroi = document.getElementById('editHeroi').value;
   const foto = document.getElementById('editFoto').value.trim();
+  const fotoPos = parseInt(document.getElementById('editFotoPos').value);
 
   msg.textContent = '⏳ Salvando...';
   msg.className = 'msg';
   try {
-    const atualizacao = { heroi };
+    const atualizacao = { heroi, fotoPos };
     if (foto) atualizacao.foto = foto;
     await db.ref('criancas/' + id).update(atualizacao);
     document.getElementById('editFoto').value = '';
