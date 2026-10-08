@@ -15,9 +15,9 @@
 body {
   font-family: 'Nunito', sans-serif;
   min-height: 100vh; color: #ece8f4; overflow-x: hidden;
-  background: #0b1026; /* fallback enquanto a imagem carrega */
+  background: #0b1026;
 }
-/* Camada de fundo própria (funciona no iOS/Android, diferente do body) */
+/* Camada de fundo própria (funciona no iOS/Android) */
 .fundo {
   position: fixed; inset: 0; z-index: 0;
   background: url('fundo-herois.jpg') center top / cover no-repeat #0b1026;
@@ -66,10 +66,12 @@ body {
 .cartao-termometro:hover { transform: translateY(-6px); }
 @keyframes aparecer { from { opacity: 0; transform: translateY(24px) scale(.9); } to { opacity: 1; } }
 .foto-perfil {
-  width: 68px; height: 68px; border-radius: 50%; object-fit: cover; display: block;
-  margin: 0 auto 6px; border: 3px solid var(--heroi-cor, #3b82f6);
+  width: 104px; height: 104px; border-radius: 50%; object-fit: cover; display: block;
+  margin: 0 auto 8px; border: 4px solid var(--heroi-cor, #3b82f6);
   box-shadow: 0 4px 14px rgba(0,0,0,.5); background: #1e2948;
+  cursor: zoom-in; transition: transform .2s;
 }
+.foto-perfil:hover { transform: scale(1.06); }
 .heroi-icone { font-size: 2.6rem; display: block; margin-bottom: 2px; filter: drop-shadow(0 3px 6px rgba(0,0,0,.6)); }
 .cartao-termometro h2 { font-family: 'Baloo 2', cursive; font-size: 1.35rem; color: #fff; }
 .idade { color: #93a5cc; font-size: .78rem; font-weight: 700; margin-bottom: 14px; }
@@ -146,6 +148,7 @@ select option { color: #111; }
 .btn-verde { background: linear-gradient(135deg, #22c55e, #15803d); }
 .btn-azul  { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
 .btn-cinza { background: linear-gradient(135deg, #64748b, #334155); }
+.btn-vermelho { background: linear-gradient(135deg, #f87171, #b91c1c); }
 .msg { margin-top: 10px; font-weight: 700; font-size: .9rem; }
 .msg.ok { color: #86efac; } .msg.erro { color: #fca5a5; }
 
@@ -222,6 +225,25 @@ select option { color: #111; }
 .sem-eventos { color: #71809f; font-weight: 700; text-align: center; padding: 10px; }
 .nome-selecionada { color: #93a5cc; font-size: 1rem; }
 
+/* Lightbox: foto ampliada ao clicar */
+.lightbox {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(5,8,20,.9);
+  display: flex; align-items: center; justify-content: center;
+  cursor: zoom-out; animation: aparecer .25s ease;
+  padding: 20px;
+}
+.lightbox img {
+  max-width: 92vw; max-height: 88vh; border-radius: 20px;
+  border: 4px solid var(--heroi-cor, #fff);
+  box-shadow: 0 20px 60px rgba(0,0,0,.8);
+}
+.lightbox-fechar {
+  position: absolute; top: 16px; right: 22px;
+  color: #fff; font-size: 2.2rem; font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0,0,0,.8);
+}
+
 .rodape { position: relative; z-index: 1; text-align: center; color: #7c8bb0; font-size: .8rem; font-weight: 700; padding: 20px; }
 
 /* ===== CELULAR E TABLET: 3 heróis lado a lado ===== */
@@ -233,7 +255,7 @@ select option { color: #111; }
   }
   .cartao-termometro h2 { font-size: 1.05rem; }
   .idade { font-size: .68rem; margin-bottom: 10px; }
-  .foto-perfil { width: 48px; height: 48px; }
+  .foto-perfil { width: 72px; height: 72px; border-width: 3px; }
   .heroi-icone { font-size: 1.9rem; }
   .termometro { width: 48px; height: 160px; border-width: 3px; }
   .rosto { font-size: 1.25rem; }
@@ -279,33 +301,7 @@ select option { color: #111; }
 
   <div id="painelAdmin" class="escondido" style="display:flex;flex-direction:column;gap:22px">
 
-    <section class="cartao">
-      <h2>➕ Cadastrar herói (criança)</h2>
-      <div class="linha-form">
-        <input type="text" id="novoNome" placeholder="Nome">
-        <input type="number" id="novaIdade" placeholder="Idade" min="1" max="17">
-        <select id="novoHeroi"></select>
-      </div>
-      <div class="linha-form" style="margin-top:10px">
-        <input type="text" id="novaFoto" placeholder="Foto: nome do arquivo no GitHub (ex: miguel.jpg) — opcional">
-        <button class="btn btn-verde" onclick="cadastrarCrianca()">Cadastrar</button>
-      </div>
-      <p id="msgCadastro" class="msg"></p>
-    </section>
-
-    <section class="cartao">
-      <h2>✏️ Editar herói / foto da criança</h2>
-      <div class="linha-form">
-        <select id="editCrianca"><option value="">Selecione a criança</option></select>
-        <select id="editHeroi"></select>
-      </div>
-      <div class="linha-form" style="margin-top:10px">
-        <input type="text" id="editFoto" placeholder="Nova foto (ex: miguel.jpg) — opcional">
-        <button class="btn btn-azul" onclick="salvarEdicao()">Salvar alterações</button>
-      </div>
-      <p id="msgEdicao" class="msg"></p>
-    </section>
-
+    <!-- 1) USO DO DIA A DIA: lançar eventos -->
     <section class="cartao">
       <h2>📝 Lançar evento</h2>
       <div class="seletor-criancas" id="seletorCriancas"></div>
@@ -314,6 +310,7 @@ select option { color: #111; }
       <button class="btn btn-cinza btn-desfazer" onclick="desfazerUltimo()">↩️ Desfazer último evento</button>
     </section>
 
+    <!-- 2) USO DO DIA A DIA: tarefas -->
     <section class="cartao">
       <h2>✅ Tarefas do dia</h2>
       <div class="linha-form" style="margin-bottom:14px">
@@ -323,9 +320,42 @@ select option { color: #111; }
       <div id="listaTarefas" class="lista-tarefas"></div>
     </section>
 
+    <!-- 3) Acompanhamento do dia -->
     <section class="cartao">
       <h2>📋 Eventos de hoje <span id="nomeSelecionada" class="nome-selecionada"></span></h2>
       <div id="listaEventos" class="lista-eventos"></div>
+    </section>
+
+    <!-- 4) Cadastro -->
+    <section class="cartao">
+      <h2>➕ Cadastrar herói (criança)</h2>
+      <div class="linha-form">
+        <input type="text" id="novoNome" placeholder="Nome">
+        <input type="number" id="novaIdade" placeholder="Idade" min="1" max="17">
+        <select id="novoHeroi"></select>
+      </div>
+      <div class="linha-form" style="margin-top:10px">
+        <input type="text" id="novaFoto" placeholder="Foto: nome do arquivo no GitHub (ex: miguel.png) — opcional">
+        <button class="btn btn-verde" onclick="cadastrarCrianca()">Cadastrar</button>
+      </div>
+      <p id="msgCadastro" class="msg"></p>
+    </section>
+
+    <!-- 5) Edição -->
+    <section class="cartao">
+      <h2>✏️ Editar herói / foto / zerar pontos</h2>
+      <div class="linha-form">
+        <select id="editCrianca"><option value="">Selecione a criança</option></select>
+        <select id="editHeroi"></select>
+      </div>
+      <div class="linha-form" style="margin-top:10px">
+        <input type="text" id="editFoto" placeholder="Nova foto (ex: miguel.png) — opcional">
+        <button class="btn btn-azul" onclick="salvarEdicao()">Salvar alterações</button>
+      </div>
+      <div class="linha-form" style="margin-top:10px">
+        <button class="btn btn-vermelho" onclick="zerarPontosHoje()">🔄 Zerar pontos de hoje</button>
+      </div>
+      <p id="msgEdicao" class="msg"></p>
     </section>
 
   </div>
@@ -352,7 +382,6 @@ const firebaseConfig = {
 
 const SENHA_ADMIN = 'goldo'; // 🔑 senha da área dos pais
 
-// Inicializa o Firebase IMEDIATAMENTE
 firebase.initializeApp(firebaseConfig);
 var db = firebase.database();
 
@@ -395,6 +424,14 @@ const TIPOS_EVENTO = [
 function hoje() { return new Date().toLocaleDateString('sv-SE'); }
 function nivelDe(p) { return Math.max(PONTUACAO_MIN, Math.min(PONTUACAO_MAX, p || 0)) + 5; }
 
+// ATÔMICO: lê e grava numa única operação no servidor — impossível dessincronizar,
+// mesmo com dois aparelhos lançando eventos ao mesmo tempo
+function alterarPontosAtomico(childId, delta) {
+  return db.ref('criancas/' + childId + '/pontos').transaction((atual) => {
+    return Math.max(PONTUACAO_MIN, Math.min(PONTUACAO_MAX, (atual || 0) + delta));
+  });
+}
+
 async function garantirResetDiario(childId, crianca) {
   if (crianca.ultimoDia === hoje()) return;
   if (crianca.ultimoDia && typeof crianca.pontos === 'number') {
@@ -403,12 +440,6 @@ async function garantirResetDiario(childId, crianca) {
     });
   }
   await db.ref('criancas/' + childId).update({ pontos: 0, ultimoDia: hoje() });
-}
-
-async function atualizarPontos(childId, pontosAtuais, delta) {
-  const novos = Math.max(PONTUACAO_MIN, Math.min(PONTUACAO_MAX, (pontosAtuais || 0) + delta));
-  await db.ref('criancas/' + childId + '/pontos').set(novos);
-  return novos;
 }
 
 /* ==================== 5) INICIALIZAÇÃO DA PÁGINA ==================== */
@@ -438,7 +469,6 @@ TIPOS_EVENTO.forEach(t => {
   gradeEventos.appendChild(btn);
 });
 
-// Verifica se as chaves foram coladas
 const configOk = firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('COLE_AQUI');
 
 if (!configOk) {
@@ -466,7 +496,7 @@ const grade = document.getElementById('viewTermometro');
 const seletor = document.getElementById('seletorCriancas');
 const listaEventos = document.getElementById('listaEventos');
 var criancaSelecionada = null;
-var dadosCriancas = null; // guarda os dados para a tela de edição
+var dadosCriancas = null;
 
 if (configOk) {
   db.ref('criancas').on('value', async (snapshot) => {
@@ -507,9 +537,12 @@ function criarAvatar(crianca, classeExtra) {
   if (crianca.foto) {
     const img = document.createElement('img');
     img.className = classeExtra;
-    img.src = crianca.foto; // ex: miguel.jpg (na mesma pasta do index.html)
+    img.src = crianca.foto; // ex: miguel.png (na mesma pasta do index.html)
     img.alt = crianca.nome;
     img.onerror = () => { img.replaceWith(document.createTextNode('')); };
+    if (classeExtra === 'foto-perfil') {
+      img.onclick = (e) => { e.stopPropagation(); verFoto(crianca.foto, crianca.nome, crianca.heroi); };
+    }
     return img;
   }
   const span = document.createElement('span');
@@ -558,7 +591,6 @@ function criarTermometro(crianca, nivel, pontos) {
   pts.textContent = (pontos > 0 ? '+' : '') + pontos + ' ponto' + (pontos === 1 || pontos === -1 ? '' : 's');
   cartao.appendChild(pts);
 
-  // DIA DE HERÓI: o próprio cartão brilha
   if (nivel === 9) cartao.classList.add('nivel-max');
 
   return cartao;
@@ -579,6 +611,30 @@ function criarChip(id, crianca) {
     carregarEventos();
   };
   seletor.appendChild(chip);
+}
+
+/* ==================== LIGHTBOX (foto ampliada) ==================== */
+function verFoto(src, nome, heroiId) {
+  fecharFoto();
+  const caixa = document.createElement('div');
+  caixa.className = 'lightbox';
+  caixa.id = 'lightboxFoto';
+  caixa.onclick = fecharFoto;
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = nome;
+  img.style.setProperty('--heroi-cor', (HEROIS[heroiId] || HEROIS.capitao).cor);
+  const fechar = document.createElement('span');
+  fechar.className = 'lightbox-fechar';
+  fechar.textContent = '✕';
+  caixa.appendChild(fechar);
+  caixa.appendChild(img);
+  document.body.appendChild(caixa);
+}
+
+function fecharFoto() {
+  const caixa = document.getElementById('lightboxFoto');
+  if (caixa) caixa.remove();
 }
 
 /* ==================== SENHA ==================== */
@@ -619,7 +675,7 @@ async function cadastrarCrianca() {
   }
 }
 
-/* ==================== EDIÇÃO (herói / foto) ==================== */
+/* ==================== EDIÇÃO (herói / foto / zerar) ==================== */
 function preencherSelectEdicao() {
   const sel = document.getElementById('editCrianca');
   const valorAtual = sel.value;
@@ -637,7 +693,6 @@ function preencherSelectEdicao() {
   }
 }
 
-// Ao trocar a criança no select de edição, já mostra o herói atual dela
 document.getElementById('editCrianca').addEventListener('change', () => {
   const id = document.getElementById('editCrianca').value;
   if (id && dadosCriancas && dadosCriancas[id]) {
@@ -660,6 +715,24 @@ async function salvarEdicao() {
     await db.ref('criancas/' + id).update(atualizacao);
     document.getElementById('editFoto').value = '';
     msg.textContent = '✅ Alterações salvas! (' + HEROIS[heroi].nome + ')';
+    msg.className = 'msg ok';
+  } catch (e) {
+    msg.textContent = '❌ Erro: ' + e.message;
+    msg.className = 'msg erro';
+  }
+}
+
+// Zera os pontos do dia e apaga os eventos de hoje (para casos de dessincronia)
+async function zerarPontosHoje() {
+  const msg = document.getElementById('msgEdicao');
+  const id = document.getElementById('editCrianca').value;
+  if (!id) { msg.textContent = 'Selecione a criança primeiro.'; msg.className = 'msg erro'; return; }
+  if (!confirm('Zerar os pontos de hoje e apagar os eventos do dia desta criança?')) return;
+  try {
+    await db.ref('eventos/' + id + '/' + hoje()).remove();
+    await db.ref('ultimoEvento/' + id).remove();
+    await db.ref('criancas/' + id).update({ pontos: 0, ultimoDia: hoje() });
+    msg.textContent = '✅ Pontos zerados! Um novo dia começou para ' + (dadosCriancas[id] ? dadosCriancas[id].nome : 'a criança') + '.';
     msg.className = 'msg ok';
   } catch (e) {
     msg.textContent = '❌ Erro: ' + e.message;
@@ -723,7 +796,6 @@ async function lancarEvento(tipo) {
   if (!crianca) return;
 
   await garantirResetDiario(criancaSelecionada, crianca);
-  const pontosAtuais = (await db.ref('criancas/' + criancaSelecionada + '/pontos').get()).val() || 0;
 
   const novoEvento = await db.ref('eventos/' + criancaSelecionada + '/' + hoje()).push({
     tipo: tipo.id, label: tipo.label, pontos: tipo.pontos, nota,
@@ -731,7 +803,7 @@ async function lancarEvento(tipo) {
   });
 
   await db.ref('ultimoEvento/' + criancaSelecionada).set(novoEvento.key);
-  await atualizarPontos(criancaSelecionada, pontosAtuais, tipo.pontos);
+  await alterarPontosAtomico(criancaSelecionada, tipo.pontos);
   document.getElementById('txtNota').value = '';
 }
 
@@ -745,24 +817,28 @@ async function desfazerUltimo() {
   const evento = evSnap.val();
   if (!evento) { alert('Evento não encontrado.'); return; }
 
-  const pontosAtuais = (await db.ref('criancas/' + criancaSelecionada + '/pontos').get()).val() || 0;
   await db.ref('eventos/' + criancaSelecionada + '/' + hoje() + '/' + eventoKey).remove();
   await db.ref('ultimoEvento/' + criancaSelecionada).remove();
-  await atualizarPontos(criancaSelecionada, pontosAtuais, -evento.pontos);
+  await alterarPontosAtomico(criancaSelecionada, -evento.pontos);
 }
 
 async function excluirEvento(childId, eventoKey, pontos) {
   if (!confirm('Excluir este evento? Os pontos serão revertidos.')) return;
-  const pontosAtuais = (await db.ref('criancas/' + childId + '/pontos').get()).val() || 0;
   await db.ref('eventos/' + childId + '/' + hoje() + '/' + eventoKey).remove();
-  await atualizarPontos(childId, pontosAtuais, -(pontos || 0));
+  await alterarPontosAtomico(childId, -(pontos || 0));
 }
+
+var refEventosAtual = null;
 
 function carregarEventos() {
   listaEventos.innerHTML = '<p class="sem-eventos">Carregando...</p>';
   if (!criancaSelecionada) { listaEventos.innerHTML = ''; return; }
 
-  db.ref('eventos/' + criancaSelecionada + '/' + hoje()).on('value', (snapshot) => {
+  // Remove a escuta anterior para não acumular (correção de bug)
+  if (refEventosAtual) refEventosAtual.off();
+  refEventosAtual = db.ref('eventos/' + criancaSelecionada + '/' + hoje());
+
+  refEventosAtual.on('value', (snapshot) => {
     const dados = snapshot.val();
     listaEventos.innerHTML = '';
     if (!dados) { listaEventos.innerHTML = '<p class="sem-eventos">Nenhum evento hoje ainda.</p>'; return; }
