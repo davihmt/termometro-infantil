@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Termômetro de Comportamento</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topo">
+    <h1>🌡️ Termômetro do Dia</h1>
+    <p class="data-hoje" id="dataHoje"></p>
+    <a class="btn-admin" href="admin.html">⚙️ Admin</a>
+  </header>
+
+  <!-- Os termômetros das crianças aparecem aqui, atualizados em tempo real -->
+  <main class="grade" id="grade"></main>
+
+  <footer class="rodape">
+    <p>Atualiza automaticamente em todos os aparelhos ✨</p>
+  </footer>
+
+  <!-- Firebase (versão compatível - mais simples de usar) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

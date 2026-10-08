@@ -1,0 +1,187 @@
+/* ===== Termômetro de Comportamento - Estilos ===== */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  color: #333;
+}
+
+/* ===== Topo ===== */
+.topo {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.topo h1 { font-size: 1.6rem; }
+
+.data-hoje { opacity: .85; margin-top: 4px; font-size: .9rem; }
+
+.btn-admin {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255,255,255,.2);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: .85rem;
+}
+
+.btn-admin:hover { background: rgba(255,255,255,.35); }
+
+/* ===== Grade de termômetros ===== */
+.grade {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  padding: 30px 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.cartao-termometro {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  width: 200px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,.08);
+}
+
+.cartao-termometro h2 { font-size: 1.2rem; margin-bottom: 2px; }
+.idade { color: #888; font-size: .8rem; margin-bottom: 14px; }
+
+/* ===== Termômetro vertical ===== */
+.termometro {
+  display: flex;
+  flex-direction: column-reverse; /* nível 1 embaixo, 9 no topo */
+  gap: 3px;
+  width: 90px;
+  margin: 0 auto;
+}
+
+.segmento {
+  height: 20px;
+  border-radius: 6px;
+  opacity: .15;
+  transition: opacity .5s, transform .3s;
+}
+
+.segmento.ativo {
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(0,0,0,.15);
+}
+
+.segmento.atual {
+  transform: scale(1.08);
+  outline: 2px solid #333;
+  outline-offset: 1px;
+}
+
+/* Cores dos 9 níveis (1 = vermelho escuro ... 9 = verde escuro) */
+.nivel-1 { background: #b71c1c; }
+.nivel-2 { background: #e53935; }
+.nivel-3 { background: #fb8c00; }
+.nivel-4 { background: #fbc02d; }
+.nivel-5 { background: #fdd835; }
+.nivel-6 { background: #81c784; }
+.nivel-7 { background: #43a047; }
+.nivel-8 { background: #2e7d32; }
+.nivel-9 { background: #1b5e20; }
+
+.rotulo-nivel {
+  margin-top: 14px;
+  font-size: .95rem;
+  font-weight: bold;
+}
+
+.pontos {
+  margin-top: 4px;
+  font-size: .8rem;
+  color: #777;
+}
+
+.estrela { font-size: 1.4rem; display: block; margin-top: 4px; }
+
+/* ===== Admin ===== */
+.admin {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cartao {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,.08);
+}
+
+.cartao h2 { font-size: 1.1rem; margin-bottom: 14px; }
+
+.linha-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+input, select {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: .95rem;
+  flex: 1;
+  min-width: 130px;
+}
+
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: .95rem;
+  cursor: pointer;
+  color: #fff;
+}
+
+.btn-verde { background: #2e7d32; }
+.btn-azul  { background: #1565c0; }
+.btn-cinza { background: #666; margin-top: 4px; }
+
+.btn:active { transform: scale(.96); }
+
+/* ===== Lista de eventos ===== */
+.lista-eventos { display: flex; flex-direction: column; gap: 8px; }
+
+.evento {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f7f7f7;
+  font-size: .9rem;
+}
+
+.evento .pts-pos { color: #2e7d32; font-weight: bold; }
+.evento .pts-neg { color: #c62828; font-weight: bold; }
+
+.sem-eventos { color: #999; font-size: .9rem; }
+
+.rodape {
+  text-align: center;
+  color: #999;
+  font-size: .8rem;
+  padding: 20px;
+}
