@@ -319,13 +319,13 @@ select option { color: #111; }
    Cole suas chaves AQUI, dentro deste objeto:
    ============================================================ */
 const firebaseConfig = {
-  apiKey: "COLE_AQUI_SUA_API_KEY",
+  apiKey: "AIzaSyCg02CpNuHVHILDVd5uz7VlG5peG1hlWY",
   authDomain: "termometro-infantil.firebaseapp.com",
   databaseURL: "https://termometro-infantil-default-rtdb.firebaseio.com",
   projectId: "termometro-infantil",
   storageBucket: "termometro-infantil.firebasestorage.app",
-  messagingSenderId: "COLE_AQUI_SENDER_ID",
-  appId: "COLE_AQUI_APP_ID"
+  messagingSenderId: "766557242567",
+  appId: "1:766557242567:web:826ab1315bb252a6116ae2"
 };
 
 const SENHA_ADMIN = 'goldo'; // 🔑 senha da área dos pais
@@ -392,17 +392,6 @@ async function atualizarPontos(childId, pontosAtuais, delta) {
 /* ==================== 5) INICIALIZAÇÃO DA PÁGINA ==================== */
 document.getElementById('dataHoje').textContent =
   new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
-
-// Estrelinhas no fundo
-const cenario = document.getElementById('cenario');
-for (let i = 0; i < 40; i++) {
-  const s = document.createElement('span');
-  s.className = 'estrela';
-  s.style.left = Math.random() * 100 + 'vw';
-  s.style.top = Math.random() * 100 + 'vh';
-  s.style.animationDelay = Math.random() * 3 + 's';
-  cenario.appendChild(s);
-}
 
 // Select de heróis no cadastro
 const selHeroi = document.getElementById('novoHeroi');
