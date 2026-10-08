@@ -1,31 +1,586 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Termômetro de Comportamento</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌡️ Termômetro do Dia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TERMÔMETRO DO DIA - Arquivo único (HTML + CSS + JS + Firebase)
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --roxo: #764ba2; --lilas: #a78bfa; --branco: #ffffff;
+  --sombra: 0 10px 30px rgba(0,0,0,.15);
+}
+body {
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh; color: #333; overflow-x: hidden;
+  background: linear-gradient(180deg, #aee7ff 0%, #e3f6ff 45%, #fff6d9 100%);
+}
+body.admin-body {
+  background: linear-gradient(180deg, #d9c8ff 0%, #f3ecff 50%, #ffeef5 100%);
+}
+.escondido { display: none !important; }
+
+/* ===== Céu animado ===== */
+.ceu { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+.nuvem { position: absolute; font-size: 3rem; opacity: .8; animation: flutuar 18s ease-in-out infinite; }
+.n1 { top: 8%; left: 5%; }
+.n2 { top: 15%; right: 8%; animation-delay: -6s; font-size: 4rem; }
+.n3 { top: 30%; left: 60%; animation-delay: -12s; font-size: 2.2rem; }
+@keyframes flutuar { 0%,100% { transform: translateX(0); } 50% { transform: translateX(40px); } }
+
+/* ===== Topo ===== */
+.topo { position: relative; z-index: 1; text-align: center; padding: 30px 16px 8px; }
+.titulo {
+  font-family: 'Baloo 2', cursive; font-size: clamp(1.8rem, 5vw, 2.6rem);
+  color: #4a3b7a; text-shadow: 0 2px 0 rgba(255,255,255,.6);
+}
+.subtitulo { color: #7a6ba8; font-weight: 700; text-transform: capitalize; margin-top: 4px; }
+
+/* Navegação (abas) */
+.nav {
+  display: flex; justify-content: center; gap: 10px; margin-top: 16px;
+  position: relative; z-index: 1;
+}
+.nav button {
+  font-family: 'Baloo 2', cursive; font-size: 1rem; border: none; cursor: pointer;
+  padding: 10px 22px; border-radius: 30px; color: #6a5a9e; background: rgba(255,255,255,.7);
+  box-shadow: 0 3px 0 rgba(0,0,0,.08); transition: transform .15s;
+}
+.nav button:active { transform: translateY(2px); }
+.nav button.ativa { background: linear-gradient(135deg, #ab7bd6, #764ba2); color: #fff; }
+
+/* ===== Grade de termômetros ===== */
+.grade {
+  position: relative; z-index: 1;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 28px;
+  padding: 30px 16px 60px; max-width: 980px; margin: 0 auto;
+}
+.cartao-termometro {
+  background: var(--branco); border-radius: 28px; padding: 26px 22px;
+  width: 215px; text-align: center; box-shadow: var(--sombra);
+  border: 4px solid #fff; outline: 3px dashed var(--lilas);
+  animation: aparecer .5s ease backwards; transition: transform .25s;
+}
+.cartao-termometro:hover { transform: translateY(-6px); }
+@keyframes aparecer { from { opacity: 0; transform: translateY(24px) scale(.9); } to { opacity: 1; } }
+.cartao-termometro h2 { font-family: 'Baloo 2', cursive; font-size: 1.5rem; color: #4a3b7a; }
+.idade { color: #9a8ec0; font-size: .8rem; font-weight: 700; margin-bottom: 16px; }
+
+/* Termômetro de vidro */
+.termometro {
+  position: relative; width: 74px; height: 250px; margin: 0 auto;
+  background: rgba(255,255,255,.65); border: 4px solid #d9cff5;
+  border-radius: 40px; overflow: hidden;
+}
+.liquido {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  transition: height 1s cubic-bezier(.34,1.56,.64,1), background-color .8s;
+  border-radius: 30px 30px 0 0;
+  display: flex; justify-content: center;
+}
+.liquido::before {
+  content: ''; position: absolute; top: 10px; left: 12px;
+  width: 10px; height: 10px; background: rgba(255,255,255,.55); border-radius: 50%;
+  box-shadow: 26px 26px 0 rgba(255,255,255,.35), 8px 60px 0 rgba(255,255,255,.3);
+}
+.rosto { position: absolute; bottom: 8px; font-size: 1.8rem; animation: balancar 3s ease-in-out infinite; }
+@keyframes balancar { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+
+.rotulo-nivel { margin-top: 16px; font-family: 'Baloo 2', cursive; font-size: 1.05rem; color: #4a3b7a; }
+.pontos {
+  display: inline-block; margin-top: 8px; padding: 4px 14px;
+  background: #f1ecff; border-radius: 20px; font-weight: 800; font-size: .85rem; color: var(--roxo);
+}
+.pontos.frio { background: #ffe3e3; color: #c62828; }
+.pontos.quente { background: #e6f7e9; color: #2e7d32; }
+.vazio { text-align: center; color: #8b7fb5; font-weight: 700; margin-top: 40px; width: 100%; }
+
+/* ===== Comemoração nível 9 ===== */
+.comemoracao {
+  position: fixed; inset: 0; background: rgba(74,59,122,.55);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+  animation: aparecer .3s ease;
+}
+.comemoracao-inner { text-align: center; }
+.comemoracao-emoji { font-size: 6rem; display: inline-block; animation: pulsar .8s ease infinite alternate; }
+.comemoracao-texto {
+  font-family: 'Baloo 2', cursive; color: #fff; font-size: 2.2rem;
+  text-shadow: 0 4px 12px rgba(0,0,0,.4);
+}
+@keyframes pulsar { from { transform: scale(1) rotate(-8deg); } to { transform: scale(1.25) rotate(8deg); } }
+.confete { position: absolute; top: -20px; font-size: 1.5rem; animation: cair 2.6s linear infinite; }
+@keyframes cair { to { transform: translateY(110vh) rotate(720deg); } }
+
+/* ===== Área Admin ===== */
+.admin {
+  position: relative; z-index: 1; max-width: 680px; margin: 0 auto;
+  padding: 20px 16px 60px; display: flex; flex-direction: column; gap: 22px;
+}
+.cartao {
+  background: var(--branco); border-radius: 24px; padding: 22px; box-shadow: var(--sombra);
+  animation: aparecer .4s ease;
+}
+.cartao h2 { font-family: 'Baloo 2', cursive; color: #4a3b7a; font-size: 1.25rem; margin-bottom: 14px; }
+.linha-form { display: flex; gap: 10px; flex-wrap: wrap; }
+input, select {
+  padding: 12px 14px; border: 3px solid #e5defa; border-radius: 14px;
+  font-size: 1rem; font-family: 'Nunito', sans-serif; flex: 1; min-width: 110px; outline: none;
+}
+input:focus { border-color: var(--lilas); }
+.btn {
+  border: none; border-radius: 14px; padding: 12px 20px;
+  font-family: 'Baloo 2', cursive; font-size: 1rem; cursor: pointer; color: #fff;
+  transition: transform .15s, box-shadow .15s; box-shadow: 0 4px 0 rgba(0,0,0,.15);
+}
+.btn:active { transform: translateY(3px); box-shadow: none; }
+.btn-verde { background: linear-gradient(135deg, #66bb6a, #2e7d32); }
+.btn-roxo  { background: linear-gradient(135deg, #ab7bd6, #764ba2); }
+.btn-cinza { background: linear-gradient(135deg, #9e9e9e, #616161); }
+.msg { margin-top: 10px; font-weight: 700; font-size: .9rem; }
+.msg.ok { color: #2e7d32; } .msg.erro { color: #c62828; }
+
+/* Tela de senha */
+.cartao-senha { max-width: 360px; margin: 40px auto; text-align: center; }
+.cartao-senha .emoji { font-size: 3rem; }
+.cartao-senha input { width: 100%; text-align: center; margin: 14px 0 12px; }
+.cartao-senha p.dica { color: #9a8ec0; font-size: .9rem; }
+.erro-senha { color: #c62828; font-weight: 700; font-size: .9rem; margin-top: 8px; }
+
+/* Chips de crianças */
+.seletor-criancas { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.chip-crianca {
+  padding: 10px 18px; border-radius: 30px; background: #f1ecff; border: 3px solid transparent;
+  font-family: 'Baloo 2', cursive; color: #6a5a9e; cursor: pointer; transition: all .2s;
+}
+.chip-crianca:hover { transform: scale(1.06); }
+.chip-crianca.selecionada {
+  background: linear-gradient(135deg, #ab7bd6, #764ba2); color: #fff;
+  border-color: #fff; box-shadow: 0 4px 12px rgba(118,75,162,.4);
+}
+
+/* Botões de evento grandes */
+.grade-eventos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.btn-evento {
+  border: none; border-radius: 16px; padding: 14px 10px;
+  font-family: 'Baloo 2', cursive; font-size: .95rem; cursor: pointer; color: #fff;
+  text-align: left; transition: transform .15s; box-shadow: 0 4px 0 rgba(0,0,0,.15);
+}
+.btn-evento:active { transform: translateY(3px); box-shadow: none; }
+.btn-evento small { display: block; font-size: 1.1rem; font-weight: 800; }
+.ev-pos-1 { background: linear-gradient(135deg, #81c784, #43a047); }
+.ev-pos-2 { background: linear-gradient(135deg, #ffd54f, #ff8f00); }
+.ev-neg-1 { background: linear-gradient(135deg, #ffb74d, #e65100); }
+.ev-neg-2 { background: linear-gradient(135deg, #e57373, #c62828); }
+.ev-neg-3 { background: linear-gradient(135deg, #8e24aa, #4a148c); }
+.campo-nota { width: 100%; margin-bottom: 12px; }
+.btn-desfazer { width: 100%; }
+
+/* Lista de eventos */
+.lista-eventos { display: flex; flex-direction: column; gap: 8px; }
+.evento {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 14px; background: #f7f4ff; font-size: .92rem;
+  animation: aparecer .3s ease;
+}
+.evento .pts { font-weight: 800; font-size: 1rem; }
+.pts.pos { color: #2e7d32; } .pts.neg { color: #c62828; }
+.evento em { color: #9a8ec0; }
+.sem-eventos { color: #b0a6d4; font-weight: 700; text-align: center; padding: 10px; }
+.nome-selecionada { color: #9a8ec0; font-size: 1rem; }
+
+.rodape { position: relative; z-index: 1; text-align: center; color: #8b7fb5; font-size: .8rem; font-weight: 700; padding: 20px; }
+</style>
 </head>
 <body>
-  <header class="topo">
-    <h1>🌡️ Termômetro do Dia</h1>
-    <p class="data-hoje" id="dataHoje"></p>
-    <a class="btn-admin" href="admin.html">⚙️ Admin</a>
-  </header>
 
-  <!-- Os termômetros das crianças aparecem aqui, atualizados em tempo real -->
-  <main class="grade" id="grade"></main>
+<div class="ceu">
+  <span class="nuvem n1">☁️</span>
+  <span class="nuvem n2">☁️</span>
+  <span class="nuvem n3">☁️</span>
+</div>
 
-  <footer class="rodape">
-    <p>Atualiza automaticamente em todos os aparelhos ✨</p>
-  </footer>
+<header class="topo">
+  <h1 class="titulo" id="tituloPagina">🌡️ Termômetro do Dia</h1>
+  <p class="subtitulo" id="dataHoje"></p>
+  <nav class="nav">
+    <button id="abaTermometro" class="ativa" onclick="mostrarView('termometro')">🌡️ Termômetro</button>
+    <button id="abaAdmin" onclick="mostrarView('admin')">⚙️ Área dos Pais</button>
+  </nav>
+</header>
 
-  <!-- Firebase (versão compatível - mais simples de usar) -->
-  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+<!-- ==================== VIEW: TERMÔMETROS ==================== -->
+<main class="grade" id="viewTermometro"></main>
 
-  <script src="js/firebase-config.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/app.js"></script>
+<!-- ==================== VIEW: ADMIN ==================== -->
+<main class="admin escondido" id="viewAdmin">
+
+  <!-- Senha -->
+  <section class="cartao cartao-senha" id="telaSenha">
+    <span class="emoji">🔐</span>
+    <h2>Área dos Pais</h2>
+    <p class="dica">Digite a senha para continuar</p>
+    <input type="password" id="campoSenha" placeholder="Senha" maxlength="20">
+    <button class="btn btn-roxo" style="width:100%" onclick="entrar()">Entrar</button>
+    <p class="erro-senha escondido" id="erroSenha">Senha incorreta, tente de novo 😅</p>
+  </section>
+
+  <!-- Painel -->
+  <div id="painelAdmin" class="escondido" style="display:flex;flex-direction:column;gap:22px">
+
+    <section class="cartao">
+      <h2>➕ Cadastrar criança</h2>
+      <div class="linha-form">
+        <input type="text" id="novoNome" placeholder="Nome">
+        <input type="number" id="novaIdade" placeholder="Idade" min="1" max="17">
+        <button class="btn btn-verde" onclick="cadastrarCrianca()">Cadastrar</button>
+      </div>
+      <p id="msgCadastro" class="msg"></p>
+    </section>
+
+    <section class="cartao">
+      <h2>📝 Lançar evento</h2>
+      <div class="seletor-criancas" id="seletorCriancas"></div>
+      <div class="grade-eventos" id="gradeEventos"></div>
+      <input type="text" id="txtNota" class="campo-nota" placeholder="📝 Observação (opcional — ex: brigou com o irmão)">
+      <button class="btn btn-cinza btn-desfazer" onclick="desfazerUltimo()">↩️ Desfazer último evento</button>
+    </section>
+
+    <section class="cartao">
+      <h2>📋 Eventos de hoje <span id="nomeSelecionada" class="nome-selecionada"></span></h2>
+      <div id="listaEventos" class="lista-eventos"></div>
+    </section>
+
+  </div>
+</main>
+
+<!-- Comemoração nível 9 -->
+<div id="comemoracao" class="comemoracao escondido">
+  <div class="comemoracao-inner">
+    <span class="comemoracao-emoji">🌟</span>
+    <p class="comemoracao-texto">DIA EXCEPCIONAL!</p>
+  </div>
+</div>
+
+<footer class="rodape">Atualiza sozinho em todos os aparelhos ✨</footer>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+
+<script>
+/* ============================================================
+   CONFIGURAÇÃO DO FIREBASE — cole suas chaves aqui dentro!
+   (Firebase Console → ⚙️ Configurações do projeto → Seus
+    aplicativos → ícone </> → copiar firebaseConfig)
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "COLE_AQUI_SUA_API_KEY",
+  authDomain: "COLE_AQUI.firebaseapp.com",
+  databaseURL: "https://COLE_AQUI-default-rtdb.firebaseio.com",
+  projectId: "COLE_AQUI",
+  storageBucket: "COLE_AQUI.appspot.com",
+  messagingSenderId: "000000000000",
+  appId: "COLE_AQUI"
+};
+
+const SENHA_ADMIN = 'goldo'; // 🔑 senha da área dos pais
+
+/* ============================================================
+   REGRAS DO JOGO — escala de 9 níveis
+   Pontos: -4 a +4 · Nível = pontos + 5 (fica entre 1 e 9)
+   ============================================================ */
+const NIVEIS = {
+  1: { nome: 'Dia difícil',        emoji: '😢', cor: '#b71c1c' },
+  2: { nome: 'Muito difícil',      emoji: '😟', cor: '#e53935' },
+  3: { nome: 'Comportamento ruim', emoji: '😕', cor: '#fb8c00' },
+  4: { nome: 'Alerta amarelo',     emoji: '😐', cor: '#fbc02d' },
+  5: { nome: 'Neutro',             emoji: '🙂', cor: '#fdd835' },
+  6: { nome: 'Indo bem!',          emoji: '😊', cor: '#81c784' },
+  7: { nome: 'Bom dia!',           emoji: '😄', cor: '#43a047' },
+  8: { nome: 'Muito bem!',         emoji: '😁', cor: '#2e7d32' },
+  9: { nome: 'DIA EXCEPCIONAL!',   emoji: '🌟', cor: '#1b5e20' },
+};
+const PONTUACAO_MIN = -4, PONTUACAO_MAX = 4;
+
+const TIPOS_EVENTO = [
+  { id: 'tarefa',      label: 'Tarefa concluída',       pontos: +1, classe: 'ev-pos-1' },
+  { id: 'positivo',    label: 'Comportamento positivo', pontos: +1, classe: 'ev-pos-1' },
+  { id: 'excepcional', label: 'Atitude excepcional',    pontos: +2, classe: 'ev-pos-2' },
+  { id: 'tarefa_nao',  label: 'Tarefa não feita',       pontos: -1, classe: 'ev-neg-1' },
+  { id: 'ruim',        label: 'Comportamento ruim',     pontos: -2, classe: 'ev-neg-2' },
+  { id: 'grave',       label: 'Comportamento grave',    pontos: -3, classe: 'ev-neg-3' },
+];
+
+/* ==================== HELPERS ==================== */
+function hoje() { return new Date().toLocaleDateString('sv-SE'); }
+function nivelDe(p) { return Math.max(PONTUACAO_MIN, Math.min(PONTUACAO_MAX, p || 0)) + 5; }
+
+// Reset diário: se mudou o dia, grava a cor final no histórico e zera
+async function garantirResetDiario(childId, crianca) {
+  if (crianca.ultimoDia === hoje()) return;
+  if (crianca.ultimoDia && typeof crianca.pontos === 'number') {
+    await db.ref('historico/' + childId + '/' + crianca.ultimoDia).set({
+      pontos: crianca.pontos, nivel: nivelDe(crianca.pontos)
+    });
+  }
+  await db.ref('criancas/' + childId).update({ pontos: 0, ultimoDia: hoje() });
+}
+
+async function atualizarPontos(childId, pontosAtuais, delta) {
+  const novos = Math.max(PONTUACAO_MIN, Math.min(PONTUACAO_MAX, (pontosAtuais || 0) + delta));
+  await db.ref('criancas/' + childId + '/pontos').set(novos);
+  return novos;
+}
+
+/* ==================== INICIALIZAÇÃO ==================== */
+document.getElementById('dataHoje').textContent =
+  new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+const configOk = firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('COLE_AQUI');
+
+if (!configOk) {
+  document.getElementById('viewTermometro').innerHTML =
+    '<p class="vazio">⚠️ <b>Firebase ainda não configurado!</b><br>Abra este arquivo no VS Code e cole suas chaves na seção <b>firebaseConfig</b> (linha com "COLE_AQUI_SUA_API_KEY").</p>';
+  throw new Error('Configurar firebaseConfig');
+}
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Cria os botões de evento uma única vez
+const gradeEventos = document.getElementById('gradeEventos');
+TIPOS_EVENTO.forEach(t => {
+  const btn = document.createElement('button');
+  btn.className = 'btn-evento ' + t.classe;
+  btn.innerHTML = t.label + '<small>' + (t.pontos > 0 ? '+' : '') + t.pontos + '</small>';
+  btn.onclick = () => lancarEvento(t);
+  gradeEventos.appendChild(btn);
+});
+
+/* ==================== NAVEGAÇÃO (ABAS) ==================== */
+function mostrarView(view) {
+  const isAdminView = view === 'admin';
+  document.getElementById('viewTermometro').classList.toggle('escondido', isAdminView);
+  document.getElementById('viewAdmin').classList.toggle('escondido', !isAdminView);
+  document.getElementById('abaTermometro').classList.toggle('ativa', !isAdminView);
+  document.getElementById('abaAdmin').classList.toggle('ativa', isAdminView);
+  document.body.classList.toggle('admin-body', isAdminView);
+  document.getElementById('tituloPagina').textContent = isAdminView ? '⚙️ Área dos Pais' : '🌡️ Termômetro do Dia';
+  // Se já passou pela senha nesta sessão, entra direto
+  if (isAdminView && sessionStorage.getItem('adminOk') === 'sim') {
+    document.getElementById('telaSenha').classList.add('escondido');
+    document.getElementById('painelAdmin').classList.remove('escondido');
+  }
+}
+
+/* ==================== TERMÔMETROS (TEMPO REAL) ==================== */
+const grade = document.getElementById('viewTermometro');
+const seletor = document.getElementById('seletorCriancas');
+const listaEventos = document.getElementById('listaEventos');
+let criancaSelecionada = null;
+let teveNivel9 = false;
+
+// Uma única escuta em tempo real alimenta TUDO: termômetros + seletor do admin
+db.ref('criancas').on('value', async (snapshot) => {
+  const dados = snapshot.val();
+  grade.innerHTML = '';
+  seletor.innerHTML = '';
+
+  if (!dados) {
+    grade.innerHTML = '<p class="vazio">Nenhuma criança cadastrada ainda.<br>Peça para os pais cadastrarem na área ⚙️</p>';
+    seletor.innerHTML = '<p class="sem-eventos">Cadastre a primeira criança acima 👆</p>';
+    criancaSelecionada = null;
+    return;
+  }
+
+  for (const [id, crianca] of Object.entries(dados)) {
+    await garantirResetDiario(id, crianca);
+    const pontos = (crianca.ultimoDia === hoje()) ? (crianca.pontos || 0) : 0;
+    const nivel = nivelDe(pontos);
+    grade.appendChild(criarTermometro(crianca, nivel, pontos));
+    criarChip(id, crianca);
+  }
+
+  // Seleciona a primeira criança automaticamente se nenhuma estiver escolhida
+  if (!criancaSelecionada || !dados[criancaSelecionada]) {
+    criancaSelecionada = Object.keys(dados)[0];
+    const chip = seletor.querySelector('.chip-crianca');
+    if (chip) chip.classList.add('selecionada');
+    document.getElementById('nomeSelecionada').textContent = '— ' + dados[criancaSelecionada].nome;
+  }
+
+  carregarEventos();
+});
+
+function criarTermometro(crianca, nivel, pontos) {
+  const cartao = document.createElement('div');
+  cartao.className = 'cartao-termometro';
+
+  const titulo = document.createElement('h2');
+  titulo.textContent = crianca.nome;
+  cartao.appendChild(titulo);
+
+  const idade = document.createElement('p');
+  idade.className = 'idade';
+  idade.textContent = crianca.idade ? crianca.idade + ' anos' : '';
+  cartao.appendChild(idade);
+
+  // Termômetro de vidro: líquido sobe/desce com animação elástica
+  const term = document.createElement('div');
+  term.className = 'termometro';
+  const liquido = document.createElement('div');
+  liquido.className = 'liquido';
+  liquido.style.height = (nivel / 9) * 100 + '%';
+  liquido.style.background = 'linear-gradient(180deg,' + NIVEIS[nivel].cor + ',' + NIVEIS[Math.max(1, nivel - 1)].cor + ')';
+  const rosto = document.createElement('span');
+  rosto.className = 'rosto';
+  rosto.textContent = NIVEIS[nivel].emoji;
+  liquido.appendChild(rosto);
+  term.appendChild(liquido);
+  cartao.appendChild(term);
+
+  const rotulo = document.createElement('p');
+  rotulo.className = 'rotulo-nivel';
+  rotulo.textContent = NIVEIS[nivel].nome;
+  cartao.appendChild(rotulo);
+
+  const pts = document.createElement('span');
+  pts.className = 'pontos' + (pontos > 0 ? ' quente' : pontos < 0 ? ' frio' : '');
+  pts.textContent = (pontos > 0 ? '+' : '') + pontos + ' ponto' + (pontos === 1 || pontos === -1 ? '' : 's');
+  cartao.appendChild(pts);
+
+  // Festa quando chega no nível 9!
+  if (nivel === 9 && !teveNivel9) { teveNivel9 = true; comemorar(crianca.nome); }
+  if (nivel < 9) teveNivel9 = false;
+
+  return cartao;
+}
+
+function comemorar(nome) {
+  const tela = document.getElementById('comemoracao');
+  tela.querySelector('.comemoracao-texto').textContent = nome.toUpperCase() + ' — DIA EXCEPCIONAL!';
+  tela.classList.remove('escondido');
+  const emojis = ['🎉', '⭐', '🎈', '🌟', '✨', '🎊'];
+  for (let i = 0; i < 30; i++) {
+    const c = document.createElement('span');
+    c.className = 'confete';
+    c.textContent = emojis[i % emojis.length];
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.animationDelay = Math.random() * 2 + 's';
+    tela.appendChild(c);
+  }
+  setTimeout(() => {
+    tela.classList.add('escondido');
+    tela.querySelectorAll('.confete').forEach(c => c.remove());
+  }, 4000);
+}
+
+/* ==================== SENHA ==================== */
+function entrar() {
+  if (document.getElementById('campoSenha').value === SENHA_ADMIN) {
+    sessionStorage.setItem('adminOk', 'sim');
+    document.getElementById('telaSenha').classList.add('escondido');
+    document.getElementById('painelAdmin').classList.remove('escondido');
+  } else {
+    document.getElementById('erroSenha').classList.remove('escondido');
+    document.getElementById('campoSenha').value = '';
+  }
+}
+document.getElementById('campoSenha').addEventListener('keydown', e => { if (e.key === 'Enter') entrar(); });
+
+/* ==================== CADASTRO DE CRIANÇAS ==================== */
+async function cadastrarCrianca() {
+  const msg = document.getElementById('msgCadastro');
+  const nome = document.getElementById('novoNome').value.trim();
+  const idade = parseInt(document.getElementById('novaIdade').value);
+  if (!nome) { msg.textContent = 'Digite o nome da criança.'; msg.className = 'msg erro'; return; }
+  try {
+    await db.ref('criancas').push({ nome, idade: idade || null, pontos: 0, ultimoDia: hoje() });
+    document.getElementById('novoNome').value = '';
+    document.getElementById('novaIdade').value = '';
+    msg.textContent = '✅ ' + nome + ' cadastrado(a)!';
+    msg.className = 'msg ok';
+  } catch (e) {
+    msg.textContent = '❌ Erro: ' + e.message;
+    msg.className = 'msg erro';
+  }
+}
+
+function criarChip(id, crianca) {
+  const chip = document.createElement('button');
+  chip.className = 'chip-crianca' + (id === criancaSelecionada ? ' selecionada' : '');
+  chip.textContent = crianca.nome;
+  chip.onclick = () => {
+    criancaSelecionada = id;
+    seletor.querySelectorAll('.chip-crianca').forEach(c => c.classList.remove('selecionada'));
+    chip.classList.add('selecionada');
+    document.getElementById('nomeSelecionada').textContent = '— ' + crianca.nome;
+    carregarEventos();
+  };
+  seletor.appendChild(chip);
+}
+
+/* ==================== EVENTOS ==================== */
+async function lancarEvento(tipo) {
+  if (!criancaSelecionada) { alert('Selecione uma criança primeiro.'); return; }
+  const nota = document.getElementById('txtNota').value.trim();
+
+  const snap = await db.ref('criancas/' + criancaSelecionada).get();
+  const crianca = snap.val();
+  if (!crianca) return;
+
+  await garantirResetDiario(criancaSelecionada, crianca);
+  const pontosAtuais = (await db.ref('criancas/' + criancaSelecionada + '/pontos').get()).val() || 0;
+
+  const novoEvento = await db.ref('eventos/' + criancaSelecionada + '/' + hoje()).push({
+    tipo: tipo.id, label: tipo.label, pontos: tipo.pontos, nota,
+    hora: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  });
+
+  await db.ref('ultimoEvento/' + criancaSelecionada).set(novoEvento.key);
+  await atualizarPontos(criancaSelecionada, pontosAtuais, tipo.pontos);
+  document.getElementById('txtNota').value = '';
+}
+
+async function desfazerUltimo() {
+  if (!criancaSelecionada) return;
+  const keySnap = await db.ref('ultimoEvento/' + criancaSelecionada).get();
+  const eventoKey = keySnap.val();
+  if (!eventoKey) { alert('Nenhum evento para desfazer hoje.'); return; }
+
+  const evSnap = await db.ref('eventos/' + criancaSelecionada + '/' + hoje() + '/' + eventoKey).get();
+  const evento = evSnap.val();
+  if (!evento) { alert('Evento não encontrado.'); return; }
+
+  const pontosAtuais = (await db.ref('criancas/' + criancaSelecionada + '/pontos').get()).val() || 0;
+  await db.ref('eventos/' + criancaSelecionada + '/' + hoje() + '/' + eventoKey).remove();
+  await db.ref('ultimoEvento/' + criancaSelecionada).remove();
+  await atualizarPontos(criancaSelecionada, pontosAtuais, -evento.pontos);
+}
+
+function carregarEventos() {
+  listaEventos.innerHTML = '<p class="sem-eventos">Carregando...</p>';
+  if (!criancaSelecionada) { listaEventos.innerHTML = ''; return; }
+
+  db.ref('eventos/' + criancaSelecionada + '/' + hoje()).on('value', (snapshot) => {
+    const dados = snapshot.val();
+    listaEventos.innerHTML = '';
+    if (!dados) { listaEventos.innerHTML = '<p class="sem-eventos">Nenhum evento hoje ainda.</p>'; return; }
+    Object.entries(dados).reverse().forEach(([id, ev]) => {
+      const div = document.createElement('div');
+      div.className = 'evento';
+      const classe = ev.pontos > 0 ? 'pos' : 'neg';
+      div.innerHTML = '<span>' + ev.hora + ' — ' + ev.label + (ev.nota ? ' <em>(' + ev.nota + ')</em>' : '') + '</span>' +
+        '<span class="pts ' + classe + '">' + (ev.pontos > 0 ? '+' : '') + ev.pontos + '</span>';
+      listaEventos.appendChild(div);
+    });
+  });
+}
+</script>
 </body>
 </html>
