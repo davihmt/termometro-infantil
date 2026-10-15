@@ -361,7 +361,7 @@ select option { color: #111; }
         <button class="btn btn-azul" onclick="salvarEdicao()">Salvar alterações</button>
       </div>
       <div class="linha-form" style="margin-top:10px">
-        <button class="btn btn-vermelho" onclick="zerarPontosHoje()">🔄 Zerar pontos de hoje</button>
+        <button class="btn btn-vermelho" onclick="zerarPontosHoje()">🔄 Reiniciar dia em +2</button>
       </div>
       <p id="msgEdicao" class="msg"></p>
     </section>
@@ -418,6 +418,7 @@ const NIVEIS = {
   9: { nome: 'DIA DE HERÓI!',      emoji: '🏆', cor: '#1b5e20' },
 };
 const PONTUACAO_MIN = -4, PONTUACAO_MAX = 4;
+const PONTOS_INICIAIS = 2; // todo dia começa em +2 (nível 7 — "Bom dia!")
 
 const TIPOS_EVENTO = [
   { id: 'tarefa',      label: 'Tarefa concluída',       pontos: +1, classe: 'ev-pos-1' },
@@ -447,7 +448,7 @@ async function garantirResetDiario(childId, crianca) {
       pontos: crianca.pontos, nivel: nivelDe(crianca.pontos)
     });
   }
-  await db.ref('criancas/' + childId).update({ pontos: 0, ultimoDia: hoje() });
+  await db.ref('criancas/' + childId).update({ pontos: PONTOS_INICIAIS, ultimoDia: hoje() });
 }
 
 /* ==================== 5) INICIALIZAÇÃO DA PÁGINA ==================== */
@@ -674,7 +675,7 @@ async function cadastrarCrianca() {
   const foto = document.getElementById('novaFoto').value.trim() || null;
   if (!nome) { msg.textContent = 'Digite o nome da criança.'; msg.className = 'msg erro'; return; }
   try {
-    await db.ref('criancas').push({ nome, idade: idade || null, heroi, foto, pontos: 0, ultimoDia: hoje() });
+    await db.ref('criancas').push({ nome, idade: idade || null, heroi, foto, pontos: PONTOS_INICIAIS, ultimoDia: hoje() });
     document.getElementById('novoNome').value = '';
     document.getElementById('novaIdade').value = '';
     document.getElementById('novaFoto').value = '';
@@ -745,7 +746,7 @@ async function zerarPontosHoje() {
   try {
     await db.ref('eventos/' + id + '/' + hoje()).remove();
     await db.ref('ultimoEvento/' + id).remove();
-    await db.ref('criancas/' + id).update({ pontos: 0, ultimoDia: hoje() });
+    await db.ref('criancas/' + id).update({ pontos: PONTOS_INICIAIS, ultimoDia: hoje() });
     msg.textContent = '✅ Pontos zerados! Um novo dia começou para ' + (dadosCriancas[id] ? dadosCriancas[id].nome : 'a criança') + '.';
     msg.className = 'msg ok';
   } catch (e) {
